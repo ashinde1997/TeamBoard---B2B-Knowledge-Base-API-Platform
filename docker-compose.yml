@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: teamboard_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-teamboard_db}
+      POSTGRES_USER: ${DB_USER:-teamboard_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-teamboard_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

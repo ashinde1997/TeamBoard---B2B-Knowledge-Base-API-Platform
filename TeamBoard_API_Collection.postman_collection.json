@@ -1,0 +1,856 @@
+{
+    "info": {
+        "_postman_id": "3086258b-8d55-4301-bc7d-fddec54db86a",
+        "name": "TeamBoard - B2B Knowledge Base API Platform",
+        "description": "Postman Collection covering all 11 evaluation scenarios for TeamBoard B2B Knowledge Base API Platform.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication",
+            "id": "3e89d16a-c9ca-4455-99a6-b9c88097f9d5",
+            "item": [
+                {
+                    "name": "1. Register a new company",
+                    "id": "21b6412b-3cf9-4447-8200-ed39212629a1",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"securepass123\",\n    \"company_name\": \"Acme Corp\",\n    \"email\": \"dev@acmecorp.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/register/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 1: Registers a new B2B client company. Generates a User and Company profile via signal with api_key, and returns JWT access token."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "ab65cbda-dac9-429e-952c-af7a8f1cdada",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 201 Created\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains credentials and token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('username', 'acmecorp');",
+                                    "    pm.expect(jsonData).to.have.property('company_name', 'Acme Corp');",
+                                    "    pm.expect(jsonData).to.have.property('api_key');",
+                                    "    pm.expect(jsonData).to.have.property('access');",
+                                    "    pm.expect(jsonData.api_key).to.be.a('string').and.not.empty;",
+                                    "    pm.expect(jsonData.access).to.be.a('string').and.not.empty;",
+                                    "",
+                                    "    pm.collectionVariables.set('client_token', jsonData.access);",
+                                    "    pm.collectionVariables.set('client_api_key', jsonData.api_key);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "2. Register with duplicate username",
+                    "id": "e39ff4e8-4d50-4d56-be5a-a2595351bddc",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"anotherpassword456\",\n    \"company_name\": \"Acme Copycat Corp\",\n    \"email\": \"other@acmecorp.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/register/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 2: Attempting to register an already existing username must return HTTP 400 Bad Request."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "7b38a11a-7a2e-4e05-9a01-5e25dc2551e0",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400 Bad Request\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response returns validation error\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('username');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "3. Login with valid credentials",
+                    "id": "53d78241-ad7b-4cf8-90bc-1841735b1375",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"securepass123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/login/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 3: Logs in the company using authenticate() and returns fresh JWT access token alongside company_name and api_key."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "463fb484-2e1d-43ff-9fe0-dd8f3a2c2dfc",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains fresh JWT access token, company_name, and api_key\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access');",
+                                    "    pm.expect(jsonData).to.have.property('company_name', 'Acme Corp');",
+                                    "    pm.expect(jsonData).to.have.property('api_key');",
+                                    "    pm.expect(jsonData.access).to.be.a('string').and.not.empty;",
+                                    "    pm.collectionVariables.set('client_token', jsonData.access);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "4. Login with wrong password",
+                    "id": "66303c1a-e24c-4699-b661-23a2c28c1423",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"acmecorp\",\n    \"password\": \"wrong_password_123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/login/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 4: Login with invalid password returns HTTP 401 Unauthorized with clear error message."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "66e6c29c-579f-44dd-8a10-c66f4b1e6e85",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error message is returned\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Setup Admin Account (Helper)",
+                    "id": "a61f615c-117b-454c-9f1c-f5513537a488",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admincompany\",\n    \"password\": \"adminpassword123\",\n    \"company_name\": \"Admin Platform Corp\",\n    \"email\": \"admin@teamboard.io\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/register/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register",
+                                ""
+                            ]
+                        },
+                        "description": "Helper: Registers the admin company user. In shell or PGAdmin, elevate role to 'admin' using: Company.objects.filter(user__username='admincompany').update(role='admin')"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "c7483da5-c6f8-437f-8923-cf669d2d3516",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.access) {",
+                                    "    pm.collectionVariables.set('admin_token', jsonData.access);",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login as Admin (Helper)",
+                    "id": "939d2496-64e7-464d-9c2a-c769ecda8c12",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admincompany\",\n    \"password\": \"adminpassword123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/auth/login/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login",
+                                ""
+                            ]
+                        },
+                        "description": "Helper: Logs in as admin to retrieve fresh admin_token for Scenario 10."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "99f1ebb3-8002-499a-8ca8-2d98924b36c8",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "var jsonData = pm.response.json();",
+                                    "pm.collectionVariables.set('admin_token', jsonData.access);"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "2. Knowledge Base Query",
+            "id": "31c51d20-48cc-4fa5-88f4-aa2e04c006c1",
+            "item": [
+                {
+                    "name": "5. Query KB - no token",
+                    "id": "b6df43d5-4977-4684-8c6e-d592ccb55ecc",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"search\": \"select_related\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/kb/query/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "kb",
+                                "query",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 5: Calling protected KB query without Authorization header must return HTTP 401 Unauthorized."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "30aa7e51-6e9f-45f8-9270-200e51fdeeda",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "6. Query KB - valid token, keyword with results",
+                    "id": "95f05dba-526c-4a7d-94b8-145acc325957",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{client_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"search\": \"select_related\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/kb/query/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "kb",
+                                "query",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 6: Querying KB with keyword that matches entries. Atomically logs the query and returns 200 with result count and entries."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "b8da5e8e-b9e8-4511-ac65-35628a94b156",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains search, count, and results array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('search', 'select_related');",
+                                    "    pm.expect(jsonData).to.have.property('count');",
+                                    "    pm.expect(jsonData.count).to.be.at.least(1);",
+                                    "    pm.expect(jsonData).to.have.property('results');",
+                                    "    pm.expect(jsonData.results).to.be.an('array').that.is.not.empty;",
+                                    "    pm.expect(jsonData.results[0]).to.have.property('id');",
+                                    "    pm.expect(jsonData.results[0]).to.have.property('question');",
+                                    "    pm.expect(jsonData.results[0]).to.have.property('answer');",
+                                    "    pm.expect(jsonData.results[0]).to.have.property('category');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "7. Query KB - valid token, no matching results",
+                    "id": "c82c4431-4ff4-4ba2-bb77-5f7d0f72bd81",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{client_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"search\": \"nonexistent_query_term_12345\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/kb/query/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "kb",
+                                "query",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 7: When nothing matches, returns 200 with count 0 and empty list, and still records the QueryLog entry."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "0d522fea-f34b-4653-803a-d862c927a655",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Returns empty results list with count 0\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('search', 'nonexistent_query_term_12345');",
+                                    "    pm.expect(jsonData).to.have.property('count', 0);",
+                                    "    pm.expect(jsonData).to.have.property('results');",
+                                    "    pm.expect(jsonData.results).to.be.an('array').that.is.empty;",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "8. Query KB - missing search field",
+                    "id": "f1119dd7-e3cf-4ee4-9322-004ece0b4c58",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{client_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"search\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/kb/query/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "kb",
+                                "query",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 8: Missing or blank search field must return HTTP 400 Bad Request."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "9ba2fe29-429e-4e55-a646-3bf2dca84759",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400 Bad Request\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "3. Admin Usage Summary",
+            "id": "d56e53e2-a9f5-4e4a-be90-eea29c360007",
+            "item": [
+                {
+                    "name": "9. Usage summary - CLIENT token",
+                    "id": "c2622074-60ee-460b-8244-7069056b914a",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{client_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/admin/usage-summary/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "admin",
+                                "usage-summary",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 9: Regular CLIENT users hitting admin usage summary must receive HTTP 403 Forbidden."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "0ef2948c-95b4-4371-b50d-832b369de9ee",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 403 Forbidden\", function () {",
+                                    "    pm.response.to.have.status(403);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "10. Usage summary - Admin token",
+                    "id": "9d317cae-eaef-4324-a1d0-854e42b7490d",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/admin/usage-summary/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "admin",
+                                "usage-summary",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 10: Admin role token returns total_queries, active_companies, and top 5 search terms."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "2b6f1cc6-c6dc-4184-bdc0-500c70072c16",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains platform metrics\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('total_queries');",
+                                    "    pm.expect(jsonData).to.have.property('active_companies');",
+                                    "    pm.expect(jsonData).to.have.property('top_search_terms');",
+                                    "    pm.expect(jsonData.top_search_terms).to.be.an('array');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "11. Verify QueryLog created - check PGAdmin after scenarios 6 and 7",
+                    "id": "0f3c4c2b-991b-464a-877f-8eaee3ee3c4d",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{admin_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/api/admin/usage-summary/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "api",
+                                "admin",
+                                "usage-summary",
+                                ""
+                            ]
+                        },
+                        "description": "Scenario 11: Validates that queries executed during scenarios 6 and 7 persisted as QueryLog rows and are reflected in platform query metrics. In PGAdmin / psql, verify via: SELECT * FROM api_querylog;"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "id": "21684955-fbe2-4154-8c12-71e09a841bc1",
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"QueryLog entries are reflected in total queries count\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.total_queries).to.be.at.least(2);",
+                                    "    pm.expect(jsonData.active_companies).to.be.at.least(1);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000",
+            "type": "string"
+        },
+        {
+            "key": "client_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "client_api_key",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "admin_token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
